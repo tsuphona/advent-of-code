@@ -1,25 +1,42 @@
-#include <list>
-#include <vector>
+#include <tclap/CmdLine.h>
 
-#include "module_1.hpp"
-#include "module_2.hpp"
+#include <iostream>
+#include <string>
 
-int main() {
-  module_1();
-  module_2();
+#include "mandelbrot.hpp"
 
-  // Test stuff.
-  std::list<int> l = {1, 2, 3, 4, 5, 6};
-  std::vector<int> v = {7, 8, 9, 10, 11, 12};
+int main(int argc, char** argv) {
+  try {
+    // Define the command line object.
+    TCLAP::CmdLine cmd("Run selected modules", ' ', "0.0.1");
 
-  // Test prints.
-  print_list(&l);
-  print_vector(&v);
+    // Define a value argument and add it to command line.
+    TCLAP::ValueArg<int> moduleArg("m", "module", "Module to run", true, 0,
+                                   "int");
+    cmd.add(moduleArg);
 
-  // Test binary search.
-  bool found;
-  found = binary_search(&v, 22);
-  std::cout << found << std::endl;
+    // Parse the command line arguments.
+    cmd.parse(argc, argv);
+
+    // Get the value parsed by each argument.
+    int module = moduleArg.getValue();
+
+    // Run modules.
+    switch (module) {
+      case 0:
+        std::cout << "Running module: connect_the_dots" << module << std::endl;
+        break;
+      case 1:
+        std::cout << "Running module: mandelbrot" << module << std::endl;
+        Mandelbrot();
+        break;
+    }
+
+  } catch (TCLAP::ArgException& e) {
+    std::cerr << "Error: " << e.error() << " for arg " << e.argId()
+              << std::endl;
+    return 1;
+  }
 
   return 0;
 }

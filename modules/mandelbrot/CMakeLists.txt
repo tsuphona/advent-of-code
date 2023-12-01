@@ -1,3 +1,5 @@
-add_executable(mandelbrot src/mandelbrot.cpp)
+add_library(mandelbrot src/mandelbrot.cpp)
 
-target_link_libraries(mandelbrot SDL2::SDL2)
+target_include_directories(mandelbrot PRIVATE include)
+
+target_link_libraries(mandelbrot PRIVATE SDL2::SDL2)

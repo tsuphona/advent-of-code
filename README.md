@@ -1,3 +1,4 @@
-# cpp-template
+# Advent of code
 
-Template for creating cpp projects.
+Project to solve advent of code problems.
+See [aoc](https://adventofcode.com/).

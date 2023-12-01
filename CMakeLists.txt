@@ -2,19 +2,14 @@
 cmake_minimum_required(VERSION 3.26)
 
 # Specify project name.
-project(cpp-template VERSION 1.0.0)
+project(aoc VERSION 0.0.1)
 
 # Specify C++ standard.
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDRAD_REQUIRED)
 
-# Add modules.
-add_subdirectory(modules/module_1)
-add_subdirectory(modules/module_2)
-add_subdirectory(modules/connect_the_dots)
-add_subdirectory(modules/random_walk)
+# Add subdirectories.
 add_subdirectory(modules/mandelbrot)
-add_subdirectory(modules/opengl)
 
 # ---------- Google test stuff ----------
 include(FetchContent)
@@ -33,15 +28,6 @@ set(gtest_force_shared_crt
 
 FetchContent_MakeAvailable(googletest)
 
-# ---------- GLFW stuff ----------
-FetchContent_Declare(
-  glfw
-  GIT_REPOSITORY https://github.com/glfw/glfw.git
-  GIT_TAG 7482de6071d21db77a7236155da44c172a7f6c9e # Release 3.3.8
-  DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
-
-FetchContent_MakeAvailable(glfw)
-
 # ---------- SDL2 stuff ----------
 FetchContent_Declare(
   SDL2
@@ -51,20 +37,12 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL2)
 
-# ---------- GLAD stuff ----------
-# Add the GLAD source file
-add_library(glad external/glad/src/glad.c)
-
-# Include the GLAD header file
-target_include_directories(glad PUBLIC external/glad/include)
-
-# --------- Main stuff ----------
-# Add an executable.
-include_directories(modules/module_1/include/ modules/module_2/include/)
-
-add_executable(cpp-template main.cpp)
-
-# Link the executable with the libraries (modules)
-target_link_libraries(cpp-template module_1 module_2)
-
+# ---------- Main and TCLAP stuff ----------
+add_executable(aoc main.cpp)
 enable_testing()
+target_include_directories(
+  aoc
+  PRIVATE external/tclap/include
+  PRIVATE modules/mandelbrot/include)
+
+target_link_libraries(aoc PRIVATE mandelbrot)
