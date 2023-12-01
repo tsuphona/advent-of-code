@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDRAD_REQUIRED)
 
 # Add subdirectories.
-add_subdirectory(modules/mandelbrot)
+add_subdirectory(modules/day1)
 
 # ---------- Google test stuff ----------
 include(FetchContent)
@@ -28,21 +28,12 @@ set(gtest_force_shared_crt
 
 FetchContent_MakeAvailable(googletest)
 
-# ---------- SDL2 stuff ----------
-FetchContent_Declare(
-  SDL2
-  GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-  GIT_TAG 15ead9a40d09a1eb9972215cceac2bf29c9b77f6 # Release 2.28.5
-  DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
-
-FetchContent_MakeAvailable(SDL2)
-
 # ---------- Main and TCLAP stuff ----------
 add_executable(aoc main.cpp)
 enable_testing()
 target_include_directories(
   aoc
   PRIVATE external/tclap/include
-  PRIVATE modules/mandelbrot/include)
+  PRIVATE modules/day1/include)
 
-target_link_libraries(aoc PRIVATE mandelbrot)
+target_link_libraries(aoc PRIVATE day1)

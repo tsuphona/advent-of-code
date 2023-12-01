@@ -67,7 +67,8 @@
     "thread": "cpp",
     "cinttypes": "cpp",
     "variant": "cpp",
-    "complex": "cpp"
+    "complex": "cpp",
+    "strstream": "cpp"
   },
   "workbench.colorCustomizations": {
     "activityBar.background": "#083142",
