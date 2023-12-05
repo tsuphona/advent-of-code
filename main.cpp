@@ -5,6 +5,7 @@
 #include <string>
 
 #include "day1.hpp"
+#include "day2.hpp"
 
 int main(int argc, char** argv) {
   try {
@@ -40,6 +41,11 @@ int main(int argc, char** argv) {
       case 1:
         std::cout << "Running Advent of Code: Day1" << std::endl;
         Day1(file);
+        break;
+
+      case 2:
+        std::cout << "Running Advent of Code: Day2" << std::endl;
+        Day2(file);
         break;
     }
 
