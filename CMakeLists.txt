@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDRAD_REQUIRED)
 # Add subdirectories.
 add_subdirectory(modules/day1)
 add_subdirectory(modules/day2)
+add_subdirectory(modules/day3)
 
 # ---------- Google test stuff ----------
 include(FetchContent)
@@ -36,9 +37,11 @@ target_include_directories(
   aoc
   PRIVATE external/tclap/include
   PRIVATE modules/day1/include
-  PRIVATE modules/day2/include)
+  PRIVATE modules/day2/include
+  PRIVATE modules/day3/include)
 
 target_link_libraries(
   aoc
   PRIVATE day1
-  PRIVATE day2)
+  PRIVATE day2
+  PRIVATE day3)
