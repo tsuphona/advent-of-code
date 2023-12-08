@@ -21,7 +21,50 @@ static bool IsSpecialCharacter(const char& c) {
   return is_special_character;
 }
 
-int SumLine(std::string& current_line, std::string& neighbor_line) {
+static void FillVectors(std::vector<int>& row_index,
+                        std::vector<int>& col_index,
+                        std::vector<int>& first_adjacent_number,
+                        std::vector<int>& second_adjacent_number, int row,
+                        int col, char c, int num) {
+  if (c == '*') {
+    bool found_match = false;
+    int found_index;
+
+    if (row_index.empty()) {
+      row_index.push_back(row);
+      col_index.push_back(col);
+      first_adjacent_number.push_back(num);
+      second_adjacent_number.push_back(0);
+
+    } else {
+      for (size_t i = 0; i < row_index.size(); i++) {
+        if (row_index[i] == row && col_index[i] == col) {
+          found_match = true;
+          found_index = i;
+          break;
+        }
+      }
+
+      if (!found_match) {
+        row_index.push_back(row);
+        col_index.push_back(col);
+        first_adjacent_number.push_back(num);
+        second_adjacent_number.push_back(0);
+      } else {
+        second_adjacent_number[found_index] = num;
+      }
+    }
+  }
+}
+
+int SumLine(std::string& current_line, std::string& neighbor_line,
+            std::vector<int>& row_index, std::vector<int>& col_index,
+            std::vector<int>& first_adjacent_number,
+            std::vector<int>& second_adjacent_number, int line_number) {
+  int k = (line_number == 0) ? 1 : line_number - 1;
+
+  bool is_asterisk = false;
+
   bool left_is_special_character = false;
   bool right_is_special_character = false;
   bool up_down_is_special_character = false;
@@ -84,44 +127,79 @@ int SumLine(std::string& current_line, std::string& neighbor_line) {
         up_down_character = neighbor_line[cols[j]];
         up_down_is_special_character = IsSpecialCharacter(up_down_character);
 
+        FillVectors(row_index, col_index, first_adjacent_number,
+                    second_adjacent_number, k, cols[j], up_down_character, num);
+
         if (cols[j] == 0) {
           // Right.
           right_character = current_line[cols[j] + 1];
           right_is_special_character = IsSpecialCharacter(right_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number, cols[j] + 1,
+                      right_character, num);
+
           // Diagonal-right.
           diagonal_right_character = neighbor_line[cols[j] + 1];
           diagonal_right_is_special_character =
               IsSpecialCharacter(diagonal_right_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, k, cols[j] + 1,
+                      diagonal_right_character, num);
 
         } else if (cols[j] == (nbr_chars - 1)) {
           // Left.
           left_character = current_line[cols[j] - 1];
           left_is_special_character = IsSpecialCharacter(left_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number, cols[j] - 1,
+                      left_character, num);
+
           // Diagonal-left.
           diagonal_left_character = neighbor_line[cols[j] - 1];
           diagonal_left_is_special_character =
               IsSpecialCharacter(diagonal_left_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, k, cols[j] - 1,
+                      diagonal_left_character, num);
 
         } else {
           // Left.
           left_character = current_line[cols[j] - 1];
           left_is_special_character = IsSpecialCharacter(left_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number, cols[j] - 1,
+                      left_character, num);
+
           // Right.
           right_character = current_line[cols[j] + 1];
           right_is_special_character = IsSpecialCharacter(right_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number, cols[j] + 1,
+                      right_character, num);
 
           // Diagonal-left.
           diagonal_left_character = neighbor_line[cols[j] - 1];
           diagonal_left_is_special_character =
               IsSpecialCharacter(diagonal_left_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, k, cols[j] - 1,
+                      diagonal_left_character, num);
+
           // Diagonal-right.
           diagonal_right_character = neighbor_line[cols[j] + 1];
           diagonal_right_is_special_character =
               IsSpecialCharacter(diagonal_right_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, k, cols[j] + 1,
+                      diagonal_right_character, num);
         }
 
         if (left_is_special_character || right_is_special_character ||
@@ -159,7 +237,10 @@ int SumLine(std::string& current_line, std::string& neighbor_line) {
 }
 
 int SumLine(std::string& current_line, std::string& previous_line,
-            std::string& next_line) {
+            std::string& next_line, std::vector<int>& row_index,
+            std::vector<int>& col_index,
+            std::vector<int>& first_adjacent_number,
+            std::vector<int>& second_adjacent_number, int line_number) {
   bool left_is_special_character = false;
   bool right_is_special_character = false;
   bool up_is_special_character = false;
@@ -217,7 +298,6 @@ int SumLine(std::string& current_line, std::string& previous_line,
     if ((!IsDigit(current_line[i]) || (i == nbr_chars - 1)) &&
         (first_digit || second_digit || third_digit)) {
       int num = std::stoi(number);
-
       int j = 0;
       // Check neighbors when a number has been found.
       while (j < cols.size()) {
@@ -225,66 +305,122 @@ int SumLine(std::string& current_line, std::string& previous_line,
         up_character = previous_line[cols[j]];
         up_is_special_character = IsSpecialCharacter(up_character);
 
+        FillVectors(row_index, col_index, first_adjacent_number,
+                    second_adjacent_number, line_number - 1, cols[j],
+                    up_character, num);
+
         // Down.
         down_character = next_line[cols[j]];
         down_is_special_character = IsSpecialCharacter(down_character);
+
+        FillVectors(row_index, col_index, first_adjacent_number,
+                    second_adjacent_number, line_number + 1, cols[j],
+                    down_character, num);
 
         if (cols[j] == 0) {
           // Right.
           right_character = current_line[cols[j] + 1];
           right_is_special_character = IsSpecialCharacter(right_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number, cols[j] + 1,
+                      right_character, num);
+
           // Up-right.
           up_right_character = previous_line[cols[j] + 1];
           up_right_is_special_character =
               IsSpecialCharacter(up_right_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number - 1, cols[j] + 1,
+                      up_right_character, num);
+
           // Down-right.
           down_right_character = next_line[cols[j] + 1];
           down_right_is_special_character =
               IsSpecialCharacter(down_right_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number + 1, cols[j] + 1,
+                      down_right_character, num);
 
         } else if (cols[j] == (nbr_chars - 1)) {
           // Left.
           left_character = current_line[cols[j] - 1];
           left_is_special_character = IsSpecialCharacter(left_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number, cols[j] - 1,
+                      left_character, num);
+
           // Up-left.
           up_left_character = previous_line[cols[j] - 1];
           up_left_is_special_character = IsSpecialCharacter(up_left_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number - 1, cols[j] - 1,
+                      up_left_character, num);
 
           // Down-left.
           down_left_character = next_line[cols[j] - 1];
           down_left_is_special_character =
               IsSpecialCharacter(down_left_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number + 1, cols[j] - 1,
+                      down_left_character, num);
 
         } else {
           // Left.
           left_character = current_line[cols[j] - 1];
           left_is_special_character = IsSpecialCharacter(left_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number, cols[j] - 1,
+                      left_character, num);
+
           // Right.
           right_character = current_line[cols[j] + 1];
           right_is_special_character = IsSpecialCharacter(right_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number, cols[j] + 1,
+                      right_character, num);
 
           // Up-right.
           up_right_character = previous_line[cols[j] + 1];
           up_right_is_special_character =
               IsSpecialCharacter(up_right_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number - 1, cols[j] + 1,
+                      up_right_character, num);
+
           // Down-right.
           down_right_character = next_line[cols[j] + 1];
           down_right_is_special_character =
               IsSpecialCharacter(down_right_character);
 
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number + 1, cols[j] + 1,
+                      down_right_character, num);
+
           // Up-left.
           up_left_character = previous_line[cols[j] - 1];
           up_left_is_special_character = IsSpecialCharacter(up_left_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number - 1, cols[j] - 1,
+                      up_left_character, num);
 
           // Down-left.
           down_left_character = next_line[cols[j] - 1];
           down_left_is_special_character =
               IsSpecialCharacter(down_left_character);
+
+          FillVectors(row_index, col_index, first_adjacent_number,
+                      second_adjacent_number, line_number + 1, cols[j] - 1,
+                      down_left_character, num);
         }
 
         if (left_is_special_character || right_is_special_character ||
@@ -332,31 +468,13 @@ void Day3(std::istream& stream) {
   std::string previous_line;
   std::string next_line;
 
-  bool left_is_special_character = false;
-  bool right_is_special_character = false;
-  bool up_is_special_character = false;
-  bool down_is_special_character = false;
-  bool up_left_is_special_character = false;
-  bool up_right_is_special_character = false;
-  bool down_left_is_special_character = false;
-  bool down_right_is_special_character = false;
+  std::vector<int> row_index;
+  std::vector<int> col_index;
+  std::vector<int> first_adjacent_number;
+  std::vector<int> second_adjacent_number;
 
-  char left_character = '\0';
-  char right_character = '\0';
-  char up_character = '\0';
-  char down_character = '\0';
-  char up_left_character = '\0';
-  char up_right_character = '\0';
-  char down_left_character = '\0';
-  char down_right_character = '\0';
-
-  bool first_digit = false;
-  bool second_digit = false;
-  bool third_digit = false;
-  std::string number = "";
-
-  int sum = 0;
-  std::vector<int> cols;
+  int part_one_sum = 0;
+  int part_two_sum = 0;
 
   if (std::getline(stream, next_line)) {
     current_line = next_line;
@@ -366,9 +484,13 @@ void Day3(std::istream& stream) {
   while (std::getline(stream, next_line)) {
     // Do work.
     if (current_row_index == 0) {
-      sum += SumLine(current_line, next_line);
+      part_one_sum += SumLine(current_line, next_line, row_index, col_index,
+                              first_adjacent_number, second_adjacent_number,
+                              current_row_index);
     } else {
-      sum += SumLine(current_line, previous_line, next_line);
+      part_one_sum += SumLine(current_line, previous_line, next_line, row_index,
+                              col_index, first_adjacent_number,
+                              second_adjacent_number, current_row_index);
     }
 
     // Update.
@@ -378,7 +500,13 @@ void Day3(std::istream& stream) {
   }
 
   // Handle last line
-  sum += SumLine(current_line, previous_line);
+  part_one_sum +=
+      SumLine(current_line, previous_line, row_index, col_index,
+              first_adjacent_number, second_adjacent_number, current_row_index);
 
-  std::cout << "Sum: " << sum << std::endl;
+  for (size_t i = 0; i < row_index.size(); i++) {
+    part_two_sum += first_adjacent_number[i] * second_adjacent_number[i];
+  }
+  std::cout << "Part 1 sum: " << part_one_sum << std::endl;
+  std::cout << "Part 2 sum: " << part_two_sum << std::endl;
 }
