@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
         break;
 
       case 4:
-        std::cout << "Running Advent of Code: Day3" << std::endl;
+        std::cout << "Running Advent of Code: Day4" << std::endl;
         Day4(file);
         break;
     }
