@@ -153,10 +153,6 @@ static void ProcessCopies(std::vector<int>& copies, std::vector<int>& matches) {
     copies[card_number - 1] += 1;
     card_list.pop_front();
   }
-
-  // for (size_t i = 0; i < copies.size(); i++) {
-  //   std::cout << copies[i] << std::endl;
-  // }
 }
 
 void Day4(std::istream& stream) {
