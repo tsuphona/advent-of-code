@@ -1,5 +1,7 @@
 #include <cmath>
+#include <deque>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -119,6 +121,44 @@ static int GetPoints(const std::vector<int>& winning_numbers,
   return std::pow(2, match - 1);
 }
 
+static int GetNumberMatches(const std::vector<int>& winning_numbers,
+                            const std::vector<int>& player_numbers) {
+  int match = 0;
+
+  for (size_t i = 0; i < winning_numbers.size(); i++) {
+    for (size_t j = 0; j < player_numbers.size(); j++) {
+      if (winning_numbers[i] == player_numbers[j]) {
+        match++;
+      }
+    }
+  }
+
+  return match;
+}
+
+static void ProcessCopies(std::vector<int>& copies, std::vector<int>& matches) {
+  int card_number;
+  int nbr_cards = copies.size();
+  std::deque<int> card_list(nbr_cards);
+  std::iota(std::begin(card_list), std::end(card_list), 1);
+
+  while (!card_list.empty()) {
+    card_number = card_list.front();
+    int nbr_matches = matches[card_number - 1];
+    std::deque<int> winning_copies(nbr_matches);
+    std::iota(std::begin(winning_copies), std::end(winning_copies),
+              card_number + 1);
+    card_list.insert(std::end(card_list), std::begin(winning_copies),
+                     std::end(winning_copies));
+    copies[card_number - 1] += 1;
+    card_list.pop_front();
+  }
+
+  // for (size_t i = 0; i < copies.size(); i++) {
+  //   std::cout << copies[i] << std::endl;
+  // }
+}
+
 void Day4(std::istream& stream) {
   std::string line;
   int card_number;
@@ -126,12 +166,24 @@ void Day4(std::istream& stream) {
   std::vector<int> player_numbers;
   int part_one_sum = 0;
   int part_two_sum = 0;
+  std::vector<int> copies;
+  std::vector<int> nbr_matches;
+
+  size_t card = 0;
 
   while (std::getline(stream, line)) {
     card_number = ExtractCardNumber(line);
     winning_numbers = ExtractWinningNumbers(line);
     player_numbers = ExtractPlayerNumbers(line);
     part_one_sum += GetPoints(winning_numbers, player_numbers);
+
+    copies.push_back(0);
+    nbr_matches.push_back(GetNumberMatches(winning_numbers, player_numbers));
   }
+
+  ProcessCopies(copies, nbr_matches);
+  part_two_sum = std::reduce(copies.begin(), copies.end());
+
   std::cout << "Part one sum: " << part_one_sum << std::endl;
+  std::cout << "Part two sum: " << part_two_sum << std::endl;
 }
