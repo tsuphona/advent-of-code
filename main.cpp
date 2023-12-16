@@ -8,6 +8,7 @@
 #include "day2.hpp"
 #include "day3.hpp"
 #include "day4.hpp"
+#include "day5.hpp"
 
 int main(int argc, char** argv) {
   try {
@@ -58,6 +59,11 @@ int main(int argc, char** argv) {
       case 4:
         std::cout << "Running Advent of Code: Day4" << std::endl;
         Day4(file);
+        break;
+
+      case 5:
+        std::cout << "Running Advent of Code: Day5" << std::endl;
+        Day5(file);
         break;
     }
 
