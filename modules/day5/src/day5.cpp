@@ -1,8 +1,9 @@
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
-static std::vector<int> ExtractNumbersFromLine(std::string& in_line) {
-  std::vector<int> out_vec;
+static std::vector<long int> ExtractNumbersFromLine(std::string& in_line) {
+  std::vector<long int> out_vec;
   // Maybe make separator more generic.
   int colon_symbol_pos = in_line.find(':', 0);
   int space_symbol_pos = in_line.find(' ', 0);
@@ -10,7 +11,7 @@ static std::vector<int> ExtractNumbersFromLine(std::string& in_line) {
   int start_pos = 0;
   std::string substring;
   std::string remainder_substring;
-  int num;
+  long int num;
 
   // Handle header lines and empty separation lines.
   if (!in_line.empty() && (colon_symbol_pos != line_size - 1)) {
@@ -25,7 +26,7 @@ static std::vector<int> ExtractNumbersFromLine(std::string& in_line) {
     while (space_symbol_pos != std::string::npos) {
       // Process.
       substring = remainder_substring.substr(0, space_symbol_pos);
-      num = std::stoi(substring);
+      num = std::stol(substring);
       out_vec.push_back(num);
 
       // Update.
@@ -34,7 +35,7 @@ static std::vector<int> ExtractNumbersFromLine(std::string& in_line) {
 
       // Handle last element.
       if (space_symbol_pos == std::string::npos) {
-        num = std::stoi(remainder_substring);
+        num = std::stol(remainder_substring);
         out_vec.push_back(num);
       }
     }
@@ -43,40 +44,59 @@ static std::vector<int> ExtractNumbersFromLine(std::string& in_line) {
   return out_vec;
 }
 
+static long int GetDestinationNumber(long int source_number,
+                                     std::vector<std::vector<long int>> map) {
+  long int destination_number = -1;
+
+  for (size_t i = 0; i < map.size(); i++) {
+    if ((source_number >= map[i][1]) &&
+        (source_number <= map[i][1] + map[i][2] - 1)) {
+      destination_number = map[i][0] + (source_number - map[i][1]);
+      break;
+    }
+  }
+
+  destination_number =
+      destination_number < 0 ? source_number : destination_number;
+
+  return destination_number;
+}
+
 void Day5(std::istream& stream) {
   std::string line;
   int line_idx = 0;
+  std::vector<long int>::iterator lowest_location;
 
   // Seed variables.
-  std::vector<int> seed_vec;
+  std::vector<long int> seed_vec;
 
   // Seed-to-soil map variables.
   bool seed_to_soil_section = false;
-  std::vector<std::vector<int>> seed_to_soil_vec;
+  std::vector<std::vector<long int>> seed_to_soil_vec;
 
   // Soil-to-fertilizer map variables.
   bool soil_to_fertilizer_section = false;
-  std::vector<std::vector<int>> soil_to_fertilizer_vec;
+  std::vector<std::vector<long int>> soil_to_fertilizer_vec;
 
   // Fertilizer-to-water map variables.
   bool fertilizer_to_water_section = false;
-  std::vector<std::vector<int>> fertilizer_to_water_vec;
+  std::vector<std::vector<long int>> fertilizer_to_water_vec;
 
   // Water-to-light map variables.
   bool water_to_light_section = false;
-  std::vector<std::vector<int>> water_to_light_vec;
+  std::vector<std::vector<long int>> water_to_light_vec;
 
   // Light-to-temperature map variables.
   bool light_to_temperature_section = false;
-  std::vector<std::vector<int>> light_to_temperature_vec;
+  std::vector<std::vector<long int>> light_to_temperature_vec;
 
   // Temperature-to-humidity map variables.
   bool temperature_to_humidity_section = false;
-  std::vector<std::vector<int>> temperature_to_humidity_vec;
+  std::vector<std::vector<long int>> temperature_to_humidity_vec;
 
   // Humidity-to-location map variables.
   bool humidity_to_location_section = false;
-  std::vector<std::vector<int>> humidity_to_location_vec;
+  std::vector<std::vector<long int>> humidity_to_location_vec;
 
   while (std::getline(stream, line)) {
     // Determine section.
@@ -137,50 +157,50 @@ void Day5(std::istream& stream) {
 
   // Process.
   int nbr_seeds = seed_vec.size();
+  std::vector<long int> location_vec;
 
   for (size_t i = 0; i < nbr_seeds; i++) {
-    int seed_number = seed_vec[i];
-    int soil_number = -1;
-    int fertilizer_number = -1;
-    int water_number = -1;
-    int light_number = -1;
-    int temperature_number = -1;
-    int humidity_number = -1;
-    int location_number = -1;
+    long int seed_number = seed_vec[i];
+    long int soil_number;
+    long int fertilizer_number;
+    long int water_number;
+    long int light_number;
+    long int temperature_number;
+    long int humidity_number;
+    long int location_number;
 
     // Seed to soil.
-    for (size_t j = 0; j < seed_to_soil_vec.size(); j++) {
-      if ((seed_number >= seed_to_soil_vec[j][1]) &&
-          (seed_number < seed_to_soil_vec[j][1] + seed_to_soil_vec[j][2] - 1)) {
-        soil_number =
-            seed_to_soil_vec[j][0] + (seed_number - seed_to_soil_vec[j][1]);
-        break;
-      }
-    }
+    soil_number = GetDestinationNumber(seed_number, seed_to_soil_vec);
 
-    soil_number = soil_number < 0 ? seed_number : soil_number;
-    fertilizer_number = fertilizer_number < 0 ? soil_number : fertilizer_number;
-    water_number = water_number < 0 ? fertilizer_number : water_number;
-    light_number = light_number < 0 ? water_number : light_number;
+    // Soil to fertilizer.
+    fertilizer_number =
+        GetDestinationNumber(soil_number, soil_to_fertilizer_vec);
+
+    // Fertilizer to water.
+    water_number =
+        GetDestinationNumber(fertilizer_number, fertilizer_to_water_vec);
+
+    // Water to light.
+    light_number = GetDestinationNumber(water_number, water_to_light_vec);
+
+    // Light to temperature.
     temperature_number =
-        temperature_number < 0 ? light_number : temperature_number;
-    humidity_number < 0 ? temperature_number : humidity_number;
-    location_number < 0 ? humidity_number : location_number;
+        GetDestinationNumber(light_number, light_to_temperature_vec);
 
-    std::cout << seed_number << " " << soil_number << std::endl;
+    // Temperature to humidity.
+    humidity_number =
+        GetDestinationNumber(temperature_number, temperature_to_humidity_vec);
+
+    // Humidity to location.
+    location_number =
+        GetDestinationNumber(humidity_number, humidity_to_location_vec);
+
+    location_vec.push_back(location_number);
   }
 
-  // for (size_t i = 0; i < seed_vec.size(); i++) {
-  //   std::cout << seed_vec[i] << std::endl;
-  // }
+  lowest_location =
+      std::min_element(std::begin(location_vec), std::end(location_vec));
 
-  // std::vector<std::vector<int>> temp = seed_to_soil_vec;
-  // std::cout << seed_to_soil_vec.size() << std::endl;
-  // std::cout << seed_to_soil_vec[0].size() << std::endl;
-  // for (size_t i = 0; i < temp.size(); i++) {
-  //   for (size_t j = 0; j < temp[i].size(); j++) {
-  //     std::cout << temp[i][j] << ", ";
-  //   }
-  //   std::cout << std::endl;
-  // }
+  // Present result.
+  std::cout << "Part one lowest location: " << *lowest_location << std::endl;
 }
