@@ -1,3 +1,5 @@
+#include <omp.h>
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -156,51 +158,55 @@ void Day5(std::istream& stream) {
   }
 
   // Process.
-  int nbr_seeds = seed_vec.size();
+  int m = seed_vec.size();
   std::vector<long int> location_vec;
 
-  for (size_t i = 0; i < nbr_seeds; i++) {
-    long int seed_number = seed_vec[i];
-    long int soil_number;
-    long int fertilizer_number;
-    long int water_number;
-    long int light_number;
-    long int temperature_number;
-    long int humidity_number;
-    long int location_number;
+  for (size_t i = 0; i < m; i += 2) {
+    long int nbr_seeds = seed_vec[i + 1];
 
-    // Seed to soil.
-    soil_number = GetDestinationNumber(seed_number, seed_to_soil_vec);
+    for (size_t j = 0; j < nbr_seeds; j++) {
+      long int seed_number = seed_vec[i] + j;
+      long int soil_number;
+      long int fertilizer_number;
+      long int water_number;
+      long int light_number;
+      long int temperature_number;
+      long int humidity_number;
+      long int location_number;
 
-    // Soil to fertilizer.
-    fertilizer_number =
-        GetDestinationNumber(soil_number, soil_to_fertilizer_vec);
+      // Seed to soil.
+      soil_number = GetDestinationNumber(seed_number, seed_to_soil_vec);
 
-    // Fertilizer to water.
-    water_number =
-        GetDestinationNumber(fertilizer_number, fertilizer_to_water_vec);
+      // Soil to fertilizer.
+      fertilizer_number =
+          GetDestinationNumber(soil_number, soil_to_fertilizer_vec);
 
-    // Water to light.
-    light_number = GetDestinationNumber(water_number, water_to_light_vec);
+      // Fertilizer to water.
+      water_number =
+          GetDestinationNumber(fertilizer_number, fertilizer_to_water_vec);
 
-    // Light to temperature.
-    temperature_number =
-        GetDestinationNumber(light_number, light_to_temperature_vec);
+      // Water to light.
+      light_number = GetDestinationNumber(water_number, water_to_light_vec);
 
-    // Temperature to humidity.
-    humidity_number =
-        GetDestinationNumber(temperature_number, temperature_to_humidity_vec);
+      // Light to temperature.
+      temperature_number =
+          GetDestinationNumber(light_number, light_to_temperature_vec);
 
-    // Humidity to location.
-    location_number =
-        GetDestinationNumber(humidity_number, humidity_to_location_vec);
+      // Temperature to humidity.
+      humidity_number =
+          GetDestinationNumber(temperature_number, temperature_to_humidity_vec);
 
-    location_vec.push_back(location_number);
+      // Humidity to location.
+      location_number =
+          GetDestinationNumber(humidity_number, humidity_to_location_vec);
+
+      location_vec.push_back(location_number);
+    }
   }
 
   lowest_location =
       std::min_element(std::begin(location_vec), std::end(location_vec));
 
   // Present result.
-  std::cout << "Part one lowest location: " << *lowest_location << std::endl;
+  std::cout << "Part two lowest location: " << *lowest_location << std::endl;
 }
