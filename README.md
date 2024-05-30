@@ -16,3 +16,4 @@ ninja
 cd build
 ./aoc -h
 ```
+Need to refresh this.
